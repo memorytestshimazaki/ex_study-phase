@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>単語記憶実験</title>
+
+  <!-- jsPsych -->
+  <script src="https://unpkg.com/jspsych@7.3.4"></script>
+
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.3"></script>
+  <!-- プラグイン -->
+  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.3"></script>
+
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.3"></script>
+
+    <script src="https://unpkg.com/@jspsych/plugin-survey-text@1.1.3"></script>
+
+  <style>
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: white;
+    }
+
+    /* jsPsych画面全体を中央配置 */
+    .jspsych-display-element {
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .center-text {
+      width: 100%;
+      text-align: center;
+      font-family: sans-serif;
+    }
+
+  </style>
+
+</head>
+
+<body></body>
+
+<script>
+
+const jsPsych = initJsPsych();
+const DAY = 99;
+
+let timeline = [];
+const GAS_URL =
+"https://script.google.com/macros/s/AKfycbykXLPo7yOkRlGzwbBA8leKtM4_Qqq_wF9uLB9GwVDpDaYfkJb47is2StaHIp-OLpiR/exec";
+
+let participant_id = "";
+let study_start = "";
+timeline.push({
+
+  type: jsPsychSurveyText,
+
+  questions: [
+    {
+      prompt: "参加者IDを入力してください",
+      required: true
+    }
+  ],
+  
+
+  button_label: "次へ",
+
+  
+
+  on_finish: function(data){
+
+    participant_id = data.response.Q0;
+
+    study_start =
+      new Date().toISOString();
+
+    fetch(GAS_URL, {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+
+      body: JSON.stringify({
+
+        type: "study_start",
+
+        participant_id: participant_id,
+
+        day: DAY
+
+      })
+
+    });
+
+  }
+
+});
+
+/* ------------------------
+   教示画面
+------------------------ */
+
+timeline.push({
+
+  type: jsPsychHtmlButtonResponse,
+
+  stimulus: `
+   <div class="center-text"
+         style="font-size:18px; line-height:1.8;">
+      これから単語が1語ずつ表示されます。<br>
+      後ほどテストを行うので、<br>
+      単語をできるだけ多く覚えてください。<br>
+      <b>スクリーンショットやメモは取らず、<br>
+        単語を見て覚えてください。</b><br><br>
+      準備ができたら開始してください。<br><br>
+    </div>
+  `,
+
+  choices: ['開始する']
+
+});
+
+/* ------------------------
+   単語リスト
+------------------------ */
+
+let study_words = [
+  "桜花",
+  "月光",
+  "海風",
+  "図書",
+  "星空",
+  "砂浜",
+  "蝶々",
+  "虹彩",
+  "橋梁",
+  "河川",
+  "森林",
+  "鳥類",
+  "窓辺",
+  "鍵穴",
+  "石畳"
+];
+
+/* ------------------------
+   ランダム化
+------------------------ */
+
+study_words = jsPsych.randomization.shuffle(study_words);
+
+/* ------------------------
+   単語提示フェーズ
+------------------------ */
+
+study_words.forEach(function(word){
+
+  /* 注視点 ＋ */
+
+  timeline.push({
+
+    type: jsPsychHtmlKeyboardResponse,
+
+    stimulus: `
+      <div class="center-text"
+           style="font-size:80px;">
+        ＋
+      </div>
+    `,
+
+    choices: "NO_KEYS",
+
+    trial_duration: 1000
+
+  });
+
+  /* 単語提示 */
+
+  timeline.push({
+
+    type: jsPsychHtmlKeyboardResponse,
+
+    stimulus: `
+      <div class="center-text"
+           style="font-size:100px;">
+        ${word}
+      </div>
+    `,
+
+    choices: "NO_KEYS",
+
+    trial_duration: 5000
+
+  });
+
+});
+
+/* ------------------------
+   終了画面
+------------------------ */
+
+timeline.push({
+
+  type: jsPsychHtmlKeyboardResponse,
+
+  stimulus: `
+    <div class="center-text"
+         style="font-size:20px; line-height:1.8;">
+     実験は終了しました。<br>
+      ご協力ありがとうございました。<br><br>
+      <b>左下の＜を押して</b>このページを閉じ,前のページに戻ってください。
+    </div>
+  `,
+
+  choices: "NO_KEYS"
+
+});
+
+/* ------------------------
+   実行
+------------------------ */
+
+jsPsych.run(timeline);
+
+</script>
+
+</html>
