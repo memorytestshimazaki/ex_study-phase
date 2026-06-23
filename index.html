@@ -58,7 +58,7 @@ const DAY = 99;
 
 let timeline = [];
 const GAS_URL =
-"https://script.google.com/macros/s/AKfycbykXLPo7yOkRlGzwbBA8leKtM4_Qqq_wF9uLB9GwVDpDaYfkJb47is2StaHIp-OLpiR/exec";
+"https://script.google.com/macros/s/AKfycbwj995Kx89a03AbUmvUfjdOJRjVGAQKiJvt1zoBC6myGpVMduFg2la6dAoUtqiO1CZy/exec";
 
 let participant_id = "";
 let study_start = "";
@@ -68,7 +68,7 @@ timeline.push({
 
   questions: [
     {
-      prompt: "参加者IDを入力してください",
+      prompt: "ユーザーID（半角数字4桁）を入力してください",
       required: true
     }
   ],
@@ -99,7 +99,9 @@ timeline.push({
 
         participant_id: participant_id,
 
-        day: DAY
+        day: DAY,
+
+         word_order:  word_order
 
       })
 
@@ -138,21 +140,22 @@ timeline.push({
 ------------------------ */
 
 let study_words = [
-  "桜花",
-  "月光",
-  "海風",
-  "図書",
-  "星空",
-  "砂浜",
-  "蝶々",
-  "虹彩",
-  "橋梁",
-  "河川",
-  "森林",
-  "鳥類",
-  "窓辺",
-  "鍵穴",
-  "石畳"
+  {id: 991, word: "桜花"},
+  {id: 992, word: "月光"},
+  {id: 993, word: "海風"},
+  {id: 994, word: "図書"},
+  {id: 995, word: "星空"},
+  {id: 996, word: "砂浜"},
+  {id: 997, word: "蝶々"},
+  {id: 998, word: "虹彩"},
+  {id: 999, word: "橋梁"},
+  {id: 9910, word: "河川"},
+  {id: 9911, word: "森林"},
+  {id: 9912, word: "鳥類"},
+  {id: 9913, word: "窓辺"},
+  {id: 9914, word: "鍵穴"},
+  {id: 9915, word: "石畳"}
+
 ];
 
 /* ------------------------
@@ -160,13 +163,16 @@ let study_words = [
 ------------------------ */
 
 study_words = jsPsych.randomization.shuffle(study_words);
-
+const word_order = study_words.map((item, index) => ({
+  serial_position: index + 1,
+  word_id: item.id,
+  word: item.word
+}));
 /* ------------------------
    単語提示フェーズ
 ------------------------ */
 
-study_words.forEach(function(word){
-
+study_words.forEach(function(item, index){
   /* 注視点 ＋ */
 
   timeline.push({
@@ -195,13 +201,18 @@ study_words.forEach(function(word){
     stimulus: `
       <div class="center-text"
            style="font-size:100px;">
-        ${word}
+        ${item.word}
       </div>
     `,
 
     choices: "NO_KEYS",
 
-    trial_duration: 5000
+    trial_duration: 5000,
+     data: {
+      word_id: item.id,
+      word: item.word,
+      serial_position: index + 1
+    }
 
   });
 
@@ -217,10 +228,16 @@ timeline.push({
 
   stimulus: `
     <div class="center-text"
-         style="font-size:20px; line-height:1.8;">
-     実験は終了しました。<br>
+         style="font-size:18px; line-height:1.8;">
       ご協力ありがとうございました。<br><br>
-      <b>左下の＜を押して</b>このページを閉じ,前のページに戻ってください。
+      <b>ブラウザの「戻る」操作を行い、<br>
+        前のアンケート画面に戻ってください。</b><br>
+      （戻るボタンやスワイプ操作など、<br>
+      お使いの端末の方法をご利用ください。）<br>  
+      ※ページを閉じたり、×ボタンを押したり<br>
+      しないでください。<br><br>
+      アンケート画面に戻りましたら、<br>
+      「次へ」を押して回答を続けてください。<br>
     </div>
   `,
 
