@@ -58,58 +58,12 @@ const DAY = 99;
 
 let timeline = [];
 const GAS_URL =
-"https://script.google.com/macros/s/AKfycbwj995Kx89a03AbUmvUfjdOJRjVGAQKiJvt1zoBC6myGpVMduFg2la6dAoUtqiO1CZy/exec";
+"https://script.google.com/macros/s/AKfycbyjS7vdxjAuxQ6OQheR_hI0nQM-G8ihi0kgLI8EqMKlAYyzAkxfFFQROFv0Hv8t9ORt/exec";
 
-let participant_id = "";
+let participant_id = "anonymous";
 let study_start = "";
-timeline.push({
 
-  type: jsPsychSurveyText,
 
-  questions: [
-    {
-      prompt: "ユーザーID（半角数字4桁）を入力してください",
-      required: true
-    }
-  ],
-  
-
-  button_label: "次へ",
-
-  
-
-  on_finish: function(data){
-
-    participant_id = data.response.Q0;
-
-    study_start =
-      new Date().toISOString();
-
-    fetch(GAS_URL, {
-
-      method: "POST",
-
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8"
-      },
-
-      body: JSON.stringify({
-
-        type: "study_start",
-
-        participant_id: participant_id,
-
-        day: DAY,
-
-         word_order:  word_order
-
-      })
-
-    });
-
-  }
-
-});
 
 /* ------------------------
    教示画面
@@ -215,8 +169,23 @@ study_words.forEach(function(item, index){
     }
 
   });
-
 });
+
+study_start = new Date().toISOString();
+
+fetch(GAS_URL, {
+  method: "POST",
+  headers: {
+    "Content-Type": "text/plain;charset=utf-8"
+  },
+  body: JSON.stringify({
+    type: "study_start",
+    participant_id: participant_id,
+    day: DAY,
+    word_order: word_order
+  })
+});
+
 
 /* ------------------------
    終了画面
